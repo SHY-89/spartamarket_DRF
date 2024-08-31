@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 class User(AbstractUser):
     GENDER_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female'),
+        ('M', '남성'),
+        ('F', '여성'),
     )
     name = models.CharField(max_length="10")
     nickname = models.CharField(max_length="10")
