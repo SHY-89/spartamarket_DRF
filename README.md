@@ -48,6 +48,7 @@
     Django 4.2
     django-seed 0.3.1 
     djangorestframework 3.15.2 
+    djangorestframework-simplejwt 5.3.1
     
 ## API
     |순서|메소드|url|상태|설명|
