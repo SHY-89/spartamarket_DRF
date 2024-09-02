@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from django.contrib.auth.hashers import check_password
 from .models import User
 from .serializers import UserSerializer, UserProfilSerializer
 
@@ -83,8 +84,10 @@ class UserProfilAPIView(APIView):
     
     def delete(self, request, username):
         user_info = self.get_user(username)
-        if user_info.user == request.user and user_info.password == user_info.set_password(request.data['password']):
-            user_info.delete()
-            data = {"pk": f"{username} is deleted."}
-            return Response(data, status=200)
+        if user_info == request.user:
+            if check_password(request.data['password'], user_info.password):
+                user_info.delete()
+                return Response({"detail": "회원 탈퇴가 정상적으로 되었습니다"}, status= status.HTTP_200_OK)
+            else:
+                return Response({'error':'패스워드가 다릅니다.'}, status=400)        
         return Response({'error':'본인계정만 탈퇴 할 수 있습니다.'}, status=400)
