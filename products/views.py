@@ -1,17 +1,41 @@
 from django.core import serializers
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from .models import Product
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, SelectProductSerializer
+
 
 
 class ProductAPIView(APIView):
     def get(self, request):
-        articles = Product.objects.all()
-        serializer = ProductSerializer(articles, many=True)
+        # try:
+        #     page = request.query_params.get("page", 1)
+        #     page = int(page)
+        # except ValueError:
+        #     page = 1
+
+        # page_size = 20
+        # start = (page - 1) * page_size
+        # end = start + page_size
+        if request.query_params.get('serch_type') in ['title', 'content', 'user'] and request.query_params.get('serch_txt'):
+            serch_type = request.query_params.get('serch_type')
+            serch_txt = request.query_params.get('serch_txt')
+            if serch_type == 'title':
+                product = Product.objects.filter(title__icontains=serch_txt).order_by("-pk")
+            elif serch_type == 'content':
+                product = Product.objects.filter(content__icontains=serch_txt).order_by("-pk")
+            elif serch_type == 'user':
+                product = Product.objects.filter(author__username__icontains=serch_txt).order_by("-pk")
+        else:
+            product = Product.objects.all().order_by("-pk")
+        paginator = Paginator(product, 20)
+        page = request.query_params.get("page", 1)
+        products = paginator.get_page(page)
+        serializer = SelectProductSerializer(products, many=True)
         return Response(serializer.data)
 
     @permission_classes([IsAuthenticated])

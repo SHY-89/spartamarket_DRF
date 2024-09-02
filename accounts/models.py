@@ -14,3 +14,6 @@ class User(AbstractUser):
     birth_date = models.DateField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     memo = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.username

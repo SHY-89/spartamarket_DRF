@@ -5,14 +5,7 @@ from django.contrib.auth import get_user_model
 class Product(models.Model):
     title = models.CharField(max_length=120)
     content = models.TextField()
-    image = models.ImageField(upload_to="p_image/")
+    image = models.ImageField(upload_to="p_image/", default="media/p_image/zep.png")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="products")
-
-
-class BlogPost(models.Model):
-    title = models.CharField(max_length=120)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at  = models.DateTimeField(auto_now=True)
