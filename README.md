@@ -36,7 +36,7 @@
         - 구현: 해당 상품을 데이터베이스에서 삭제.
 
 ## ERD
-
+![ERD](drf.drawio.png)
 
 ## 개발 기간
     2024-08-31 ~
@@ -48,6 +48,7 @@
     Django 4.2
     django-seed 0.3.1 
     djangorestframework 3.15.2 
+    djangorestframework-simplejwt 5.3.1
     
 ## API
     |순서|메소드|url|상태|설명|
