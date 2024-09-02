@@ -11,6 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from django.contrib.auth.hashers import check_password
+import re
 from .models import User
 from .serializers import UserSerializer, UserProfilSerializer
 
@@ -24,7 +25,36 @@ def signup(request):
         return Response(status=201)
     return Response(serializer.errors, status=400)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def password_change(request, username):
+    user_info = get_object_or_404(User, username=username)
+    if check_password(request.data['old_password'], user_info.password):
+        if request.data['new_password1'] == request.data['new_password2']:
+            password = request.data['new_password1']
+            error = ""
+            if len(password) < 8:
+                error = "비밀번호는 8자리 이상이어야 합니다."
+            if not re.search(r"[a-zA-Z]", password):
+                error = "비밀번호는 하나 이상의 영문이 포함되어야 합니다."
+            if not re.search(r"\d", password):
+                error = "비밀번호는 하나 이상의 숫자가 포함되어야 합니다."
+            if not re.search(r"[!@#$%^&*()]", password):
+                error = "비밀번호는 적어도 하나 이상의 특수문자(!@#$%^&*())가 포함되어야 합니다."
+            
+            if error == "":
+                user_info.set_password(password)
+                user_info.save()
+                return Response({'detail':'패스워드가 변경되었습니다'}, status=200)   
+        else:
+            error = '변경하시려는 패스워드가 서로 다릅니다.'
+    else:
+        error = "변경전 패스워드가 다릅니다."
+    return Response({'error':error}, status=400)   
+
 class LoginAPIView(TokenObtainPairView):
+
     def post(self, request: Request, *args, **kwargs) -> Response:
         res = super().post(request, *args, **kwargs)
         data = {
