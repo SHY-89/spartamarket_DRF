@@ -51,7 +51,27 @@ def password_change(request, username):
             error = '변경하시려는 패스워드가 서로 다릅니다.'
     else:
         error = "변경전 패스워드가 다릅니다."
-    return Response({'error':error}, status=400)   
+    return Response({'error':error}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def like(request, user_pk):
+    serch_user = get_object_or_404(User, pk=user_pk)
+    message = {}
+    status = 201
+    print(request.user.pk, serch_user.pk)
+    if serch_user.pk != request.user.pk:
+        if serch_user.following.filter(pk=request.user.pk):
+            serch_user.following.remove(request.user.pk)
+            message['detile'] = "취소 되었습니다"
+        else:
+            serch_user.following.add(request.user.pk)
+            message['detile'] = "처리 되었습니다"
+    else:
+        message['error'] = "본인은 본인을 팔로우 할 수 없습니다."
+        status = 400
+    return Response(message, status=status)
 
 class LoginAPIView(TokenObtainPairView):
 

@@ -15,5 +15,7 @@ class User(AbstractUser):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     memo = models.TextField(blank=True)
 
+    following = models.ManyToManyField("self", related_name="follow", symmetrical=False)
+
     def __str__(self):
         return self.username
