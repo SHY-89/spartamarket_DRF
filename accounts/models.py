@@ -11,6 +11,9 @@ class User(AbstractUser):
     name = models.CharField(max_length=10)
     nickname = models.CharField(max_length=10)
     email = models.EmailField(_("email address"), unique=True)
-    birth_date = models.DateField()
+    birth_date = models.DateField(auto_now_add=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     memo = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.username

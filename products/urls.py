@@ -5,4 +5,5 @@ app_name="products"
 urlpatterns = [
     path("", views.ProductAPIView.as_view(), name="product"),
     path("<int:productId>/", views.ProductDetailAPIView.as_view(), name="detail"),
+    path("like/<int:product_pk>/", views.like, name="like"),
 ]
