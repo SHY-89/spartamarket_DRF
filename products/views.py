@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, api_view
+from django.db.models import Count
 from .models import Product, Category, HashTag
 from .serializers import ProductSerializer, SelectProductSerializer
 
@@ -24,15 +25,33 @@ class ProductAPIView(APIView):
         if request.query_params.get('serch_type') in ['title', 'content', 'user'] and request.query_params.get('serch_txt'):
             serch_type = request.query_params.get('serch_type')
             serch_txt = request.query_params.get('serch_txt')
+            sort_type = request.query_params.get('sort_type')
             if serch_type == 'title':
-                product = Product.objects.filter(title__icontains=serch_txt).order_by("-pk")
+                if sort_type == "like":
+                    product = Product.objects.filter(title__icontains=serch_txt).annotate(like_count=Count("like_user")).order_by("-like_count","-pk")
+                else:
+                    product = Product.objects.filter(title__icontains=serch_txt).order_by("-pk")
             elif serch_type == 'content':
-                product = Product.objects.filter(content__icontains=serch_txt).order_by("-pk")
+                if sort_type == "like":
+                    product = Product.objects.filter(content__icontains=serch_txt).annotate(like_count=Count("like_user")).order_by("-like_count","-pk")
+                else:
+                    product = Product.objects.filter(content__icontains=serch_txt).order_by("-pk")
             elif serch_type == 'user':
-                product = Product.objects.filter(author__username__icontains=serch_txt).order_by("-pk")
+                if sort_type == "like":
+                    product = Product.objects.filter(author__username__icontains=serch_txt).annotate(like_count=Count("like_user")).order_by("-like_count","-pk")
+                else:
+                    product = Product.objects.filter(author__username__icontains=serch_txt).order_by("-pk")
         else:
-            product = Product.objects.all().order_by("-pk")
-        paginator = Paginator(product, 20)
+            if request.query_params.get('sort_type') in ['date', 'like']:
+                sort_type = request.query_params.get('sort_type')
+                if sort_type == "date":
+                    product = Product.objects.all().order_by("-pk")
+                else:
+                    product = Product.objects.all().annotate(like_count=Count("like_user")).order_by("-like_count","-pk")
+            else:
+                product = Product.objects.all().order_by("-pk")
+
+        paginator = Paginator(product, 2)
         page = request.query_params.get("page", 1)
         products = paginator.get_page(page)
         serializer = SelectProductSerializer(products, many=True)
@@ -92,6 +111,7 @@ class ProductDetailAPIView(APIView):
             return Response(data, status=200)
         return Response({'error':'작성자만 삭제 할 수 있습니다.'}, status=400)
     
+
 @permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def like(request, product_pk):
