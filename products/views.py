@@ -43,7 +43,15 @@ class ProductAPIView(APIView):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             category = get_object_or_404(Category, pk=request.data['category'])
-            serializer.save(author=request.user)
+            product = serializer.save(author=request.user)
+            hashtags = request.data['hashtags'].replace(" ","").split(",")
+            for tag in hashtags:
+                if tag == "": continue
+                tag = tag.title()
+                hashtag, created = HashTag.objects.get_or_create(name=tag)
+                if hashtag.pk not in product.hashtag.all():
+                    product.hashtag.add(hashtag.pk)
+            
             return Response(serializer.data, status=201)
         
 
@@ -63,7 +71,16 @@ class ProductDetailAPIView(APIView):
         if product.author.username == request.user.username:
             serializer = ProductSerializer(product, data=request.data, partial=True)
             if serializer.is_valid(raise_exception=True):
-                serializer.save()
+                product = serializer.save()
+                hashtags = request.data['hashtags'].replace(" ","").split(",")
+                for tag in hashtags:
+                    if tag == "": continue
+                    tag = tag.title()
+                    hashtag, created = HashTag.objects.get_or_create(name=tag)
+                    if product.hashtag.filter(pk=hashtag.pk).exists():
+                        product.hashtag.remove(hashtag.pk)
+                    else:
+                        product.hashtag.add(hashtag.pk)
                 return Response(serializer.data)
         return Response({'error':'작성자만 수정이 가능합니다.'}, status=400)
 
