@@ -94,5 +94,4 @@
     djangorestframework-simplejwt 5.3.1
     
 ## API
-    |순서|메소드|url|상태|설명|
-    |--|----|---------|---------|---------|
+    https://documenter.getpostman.com/view/37835462/2sAXjNZrpW
