@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, api_view
 from .models import Product, Category, HashTag
 from .serializers import ProductSerializer, SelectProductSerializer
 
@@ -91,3 +91,21 @@ class ProductDetailAPIView(APIView):
             data = {"pk": f"{productId} is deleted."}
             return Response(data, status=200)
         return Response({'error':'작성자만 삭제 할 수 있습니다.'}, status=400)
+    
+@permission_classes([IsAuthenticated])
+@api_view(['POST'])
+def like(request, product_pk):
+    product = get_object_or_404(Product, pk=product_pk)
+    message = {}
+    status = 201
+    if product.author.pk != request.user.pk:
+        if product.like_user.filter(pk=request.user.pk):
+            product.like_user.remove(request.user.pk)
+            message['detile'] = "취소 되었습니다"
+        else:
+            product.like_user.add(request.user.pk)
+            message['detile'] = "처리 되었습니다"
+    else:
+        message['error'] = "본이 작성한 물품은 찜할 수 없습니다."
+        status = 400
+    return Response(message, status=status)
