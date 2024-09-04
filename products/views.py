@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
-from .models import Product
+from .models import Product, Category, HashTag
 from .serializers import ProductSerializer, SelectProductSerializer
 
 
@@ -42,6 +42,7 @@ class ProductAPIView(APIView):
     def post(self, request):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
+            category = get_object_or_404(Category, pk=request.data['category'])
             serializer.save(author=request.user)
             return Response(serializer.data, status=201)
         
