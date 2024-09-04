@@ -13,4 +13,5 @@ urlpatterns = [
     path("", views.signup, name="signup"),
     path("profil/<str:username>/", views.UserProfilAPIView.as_view(), name="profil"),
     path("password-change/<str:username>/", views.password_change, name="password_change"),
+    path("like/<int:user_pk>/", views.like, name="like"),
 ]
