@@ -119,7 +119,7 @@ class UserProfilAPIView(APIView):
 
     def get(self, request, username):
         user = self.get_user(username)
-        serializer = UserSerializer(user)
+        serializer = UserProfilSerializer(user)
         return Response(serializer.data, status=200)
     
     def put(self, request, username):
