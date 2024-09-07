@@ -118,11 +118,9 @@ class UserProfilAPIView(APIView):
         return get_object_or_404(User, username=username)
 
     def get(self, request, username):
-        user_info = self.get_user(username)
-        if request.user == user_info:
-            serializer = UserSerializer(user_info)
-            return Response(serializer.data, status=200)
-        return Response({"error":"본인계정만 조회가 가능합니다."}, status=400)
+        user = self.get_user(username)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=200)
     
     def put(self, request, username):
         user_info = self.get_user(username)
